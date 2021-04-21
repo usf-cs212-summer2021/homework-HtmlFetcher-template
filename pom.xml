@@ -4,7 +4,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.usfca.cs.cs212</groupId>
-	<artifactId>HomeworkName</artifactId>
+	<artifactId>HtmlFetcher</artifactId>
 	<version>2021-01</version>
 
 	<properties>
