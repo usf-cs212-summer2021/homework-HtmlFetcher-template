@@ -7,23 +7,31 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer.MethodName;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.platform.engine.discovery.DiscoverySelectors;
+import org.junit.platform.launcher.TagFilter;
+import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
+import org.junit.platform.launcher.core.LauncherFactory;
+import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 
 /**
  * Tests the {@link HtmlFetcher} class.
  *
  * @author CS 212 Software Development
  * @author University of San Francisco
- * @version Spring 2021
+ * @version Summer 2021
  */
 @TestMethodOrder(MethodName.class)
 public class HtmlFetcherTest {
@@ -336,6 +344,7 @@ public class HtmlFetcherTest {
 	 * Tests that certain classes or packages do not appear in the implementation
 	 * code. Attempts to fool this test will be considered cheating.
 	 */
+	@Tag("approach")
 	@Nested
 	public class F_ApproachTests {
 		/**
@@ -354,6 +363,30 @@ public class HtmlFetcherTest {
 				() -> Assertions.assertFalse(source.contains("import java.net.URLConnection;"), "You may not use this class."),
 				() -> Assertions.assertFalse(source.contains("import java.net.HttpURLConnection;"), "You may not use this class.")
 			);
+		}
+		
+		/**
+		 * Causes this group of tests to fail if the other non-approach tests are
+		 * not yet passing.
+		 */
+		@Test
+		public void testOthersPassing() {
+			var request = LauncherDiscoveryRequestBuilder.request()
+					.selectors(DiscoverySelectors.selectClass(HtmlFetcherTest.class))
+					.filters(TagFilter.excludeTags("approach"))
+					.build();
+
+			var launcher = LauncherFactory.create();
+			var listener = new SummaryGeneratingListener();
+
+			Logger logger = Logger.getLogger("org.junit.platform.launcher");
+			logger.setLevel(Level.SEVERE);
+
+			launcher.registerTestExecutionListeners(listener);
+			launcher.execute(request);
+
+			Assertions.assertEquals(0, listener.getSummary().getTotalFailureCount(),
+					"Must pass other tests to earn credit for approach group!");
 		}
 	}
 
